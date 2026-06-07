@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { Design, Patch } from '../geometry/types'
-import { groupValidity, toggleAssignment } from './grouping'
+import { groupValidity, toggleAssignment, autoSegment } from './grouping'
 
 const rect = (
   id: string,
@@ -79,5 +79,43 @@ describe('toggleAssignment', () => {
     patches = toggleAssignment(patches, 'b', 'A')
     expect(patches.find((p) => p.id === 'b')!.group).toBeUndefined()
     expect(patches.find((p) => p.id === 'c')!.order).toBe(2)
+  })
+})
+
+function allUnitsValid(patches: Patch[]): boolean {
+  const seg = autoSegment(patches)
+  if (!seg.every((p) => p.group && p.order)) return false
+  const d = design(seg)
+  for (const g of new Set(seg.map((p) => p.group!))) {
+    for (const ok of groupValidity(d, g).values()) if (!ok) return false
+  }
+  return true
+}
+
+describe('autoSegment', () => {
+  it('makes a 1x3 strip a single valid unit', () => {
+    const patches = [rect('a', 0, 0, 1, 1), rect('b', 1, 0, 1, 1), rect('c', 2, 0, 1, 1)]
+    const seg = autoSegment(patches)
+    expect(new Set(seg.map((p) => p.group)).size).toBe(1)
+    expect(allUnitsValid(patches)).toBe(true)
+  })
+
+  it('produces a valid segmentation for a 2x2 grid', () => {
+    const patches = [
+      rect('tl', 0, 0, 1, 1),
+      rect('tr', 1, 0, 1, 1),
+      rect('bl', 0, 1, 1, 1),
+      rect('br', 1, 1, 1, 1),
+    ]
+    expect(allUnitsValid(patches)).toBe(true)
+  })
+
+  it('produces a valid segmentation for a 3x3 grid', () => {
+    const patches: Patch[] = []
+    let i = 0
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) patches.push(rect('p' + i++, c, r, 1, 1))
+    }
+    expect(allUnitsValid(patches)).toBe(true)
   })
 })

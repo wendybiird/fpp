@@ -4,7 +4,12 @@ import type { Design, Line, PhotoPlacement, Point } from './lib/geometry/types'
 import { createDesign, splitPatch, patchAt, centroid, syncIdCounter } from './lib/model/design'
 import { reflectX, reflectY } from './lib/geometry/line'
 import { DEFAULT_PALETTE } from './lib/model/palette'
-import { nextGroupLetter, toggleAssignment, clearGroup as clearGroupPatches } from './lib/model/grouping'
+import {
+  nextGroupLetter,
+  toggleAssignment,
+  clearGroup as clearGroupPatches,
+  autoSegment,
+} from './lib/model/grouping'
 import {
   serialize,
   parseDoc,
@@ -203,6 +208,12 @@ class AppState {
   clearGroup(letter: string) {
     const patches = clearGroupPatches(this.design.patches, letter)
     this.commit({ ...this.design, patches })
+  }
+
+  /** Auto-assign every patch into foundation units + sewing order (undoable). */
+  autoNumber() {
+    this.commit({ ...this.design, patches: autoSegment(this.design.patches) })
+    this.activeGroup = 'A'
   }
 
   // --- Persistence ---

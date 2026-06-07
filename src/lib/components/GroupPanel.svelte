@@ -19,6 +19,10 @@
 <div class="panel-block">
   <h3>Paper piecing</h3>
 
+  <button class="btn primary full auto-btn" onclick={() => app.autoNumber()}>
+    ✦ Auto-number all
+  </button>
+
   <div class="group-tabs">
     {#each groups as g (g)}
       <button
