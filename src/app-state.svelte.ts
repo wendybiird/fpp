@@ -1,6 +1,6 @@
 // Central application state, using Svelte 5 runes in a `.svelte.ts` module.
 // A single exported instance (`app`) is imported wherever state is needed.
-import type { Design, Line } from './lib/geometry/types'
+import type { Design, Line, PhotoPlacement } from './lib/geometry/types'
 import { createDesign, addLine } from './lib/model/design'
 import { reflectX, reflectY } from './lib/geometry/line'
 
@@ -84,6 +84,27 @@ class AppState {
     let next = this.design
     for (const l of this.expandSymmetry(line)) next = addLine(next, l)
     if (next !== this.design) this.commit(next)
+  }
+
+  // --- Photo-to-quilt ---
+  /** Place (or clear) the reference photo. Loading one reveals it immediately
+   *  by dropping the blend to 0 (raw photo). Not part of undo history. */
+  setPhoto(photo: PhotoPlacement | undefined) {
+    this.design.photo = photo
+    this.design.blend = photo ? 0 : 1
+  }
+
+  /** Photo <-> flat-color blend (0..1). A view setting, not undoable. */
+  setBlend(v: number) {
+    this.design.blend = Math.max(0, Math.min(1, v))
+  }
+
+  /** Recolor patches from a patchId -> hex map (auto-color), as one undo step. */
+  applyPatchColors(colors: Map<string, string>) {
+    const patches = this.design.patches.map((p) =>
+      colors.has(p.id) ? { ...p, color: colors.get(p.id)! } : p,
+    )
+    this.commit({ ...this.design, patches })
   }
 
   private expandSymmetry(line: Line): Line[] {

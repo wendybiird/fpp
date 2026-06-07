@@ -26,7 +26,7 @@ export function createDesign(wIn: number, hIn: number, seamIn = 0.25): Design {
     ],
     color: DEFAULT_PATCH_COLOR,
   }
-  return { wIn, hIn, seamIn, patches: [rect], blend: 1 }
+  return { wIn, hIn, seamIn, patches: [rect], blend: 1, photo: undefined }
 }
 
 /** Average of a polygon's vertices. For a convex polygon this lands inside it,

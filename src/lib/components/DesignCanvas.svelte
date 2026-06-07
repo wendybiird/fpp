@@ -125,10 +125,24 @@
     <!-- Paper background -->
     <rect x="0" y="0" width={design.wIn} height={design.hIn} fill="#ffffff" />
 
+    <!-- Reference photo (clipped to the block by the SVG viewport) -->
+    {#if design.photo}
+      <image
+        href={design.photo.src}
+        x={design.photo.x}
+        y={design.photo.y}
+        width={design.photo.w}
+        height={design.photo.h}
+        preserveAspectRatio="none"
+        pointer-events="none"
+      />
+    {/if}
+
     {#each design.patches as patch (patch.id)}
       <polygon
         points={polygonPoints(patch.vertices)}
         fill={patch.color}
+        fill-opacity={design.blend}
         stroke="#2a2a2a"
         stroke-width="1"
         vector-effect="non-scaling-stroke"

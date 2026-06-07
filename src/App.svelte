@@ -3,6 +3,7 @@
   import Toolbar from './lib/components/Toolbar.svelte'
   import DesignCanvas from './lib/components/DesignCanvas.svelte'
   import SizeDialog from './lib/components/SizeDialog.svelte'
+  import PhotoPanel from './lib/components/PhotoPanel.svelte'
 
   function onKeydown(e: KeyboardEvent) {
     const t = e.target as HTMLElement | null
@@ -50,7 +51,10 @@
     </div>
 
     <aside class="side-panel">
-      <!-- Tool panels (palette, photo, groups) arrive in later milestones. -->
+      {#if app.mode === 'photo'}
+        <PhotoPanel />
+      {/if}
+
       <div class="panel-block">
         <h3>Design</h3>
         <dl class="meta">

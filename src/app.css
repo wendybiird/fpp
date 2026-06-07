@@ -288,3 +288,47 @@ dl.meta dd {
 svg.design.drawing-mode {
   cursor: crosshair;
 }
+
+/* ---- Photo panel ---- */
+.panel-block + .panel-block {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.btn.full {
+  display: flex;
+  width: 100%;
+  margin-top: 8px;
+  justify-content: center;
+}
+.file-btn {
+  cursor: pointer;
+}
+.filename {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.blend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.blend input[type='range'] {
+  flex: 1;
+}
+.btn.subtle {
+  color: var(--text-dim);
+}
+.hint {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin-top: 8px;
+}
