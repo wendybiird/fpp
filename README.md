@@ -72,6 +72,6 @@ Built incrementally:
 - [x] Drawing engine (per-section cuts, snapping, symmetry, undo/redo)
 - [x] Photo-to-quilt (auto-color + blend)
 - [x] Coloring palette (fill, eyedropper, snap-to-palette)
-- [ ] Paper-piecing naming (group letters + sewing order)
+- [x] Paper-piecing naming (group letters + sewing order, single-seam check)
 - [ ] True-size templates with seam allowances (print to PDF)
 - [ ] Persistence (autosave + JSON save/load)
