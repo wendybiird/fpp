@@ -1,8 +1,9 @@
 // Central application state, using Svelte 5 runes in a `.svelte.ts` module.
 // A single exported instance (`app`) is imported wherever state is needed.
-import type { Design, Line, PhotoPlacement } from './lib/geometry/types'
-import { createDesign, addLine } from './lib/model/design'
+import type { Design, Line, PhotoPlacement, Point } from './lib/geometry/types'
+import { createDesign, splitPatch, patchAt, centroid } from './lib/model/design'
 import { reflectX, reflectY } from './lib/geometry/line'
+import { DEFAULT_PALETTE } from './lib/model/palette'
 
 export type Mode = 'draw' | 'photo' | 'color' | 'name'
 export type Symmetry = 'none' | 'v' | 'h' | 'quad'
@@ -31,9 +32,14 @@ class AppState {
   /** Auto-mirror each cut across the block's axes. */
   symmetry = $state<Symmetry>('none')
 
+  // --- Colors ---
+  /** The fabric palette and the active (selected) color. */
+  palette = $state<string[]>([...DEFAULT_PALETTE])
+  activeColor = $state<string>(DEFAULT_PALETTE[2])
+
   // --- History ---
-  // We never mutate a Design in place (addLine returns a fresh one), so keeping
-  // previous references is a complete and cheap undo history — no cloning.
+  // We never mutate a Design in place (the engine returns a fresh design), so
+  // keeping previous references is a complete and cheap undo history — no cloning.
   undoStack = $state<Design[]>([])
   redoStack = $state<Design[]>([])
 
@@ -79,10 +85,16 @@ class AppState {
     }
   }
 
-  /** Apply a cut, expanded by the active symmetry, as a single undo step. */
-  applyLine(line: Line) {
+  /** Cut a single section (the patch under the cursor) by a line contained
+   *  within it, expanded by the active symmetry, as one undo step. */
+  cutPatch(patchId: string, line: Line) {
+    const target = this.design.patches.find((p) => p.id === patchId)
+    if (!target) return
     let next = this.design
-    for (const l of this.expandSymmetry(line)) next = addLine(next, l)
+    for (const cut of this.expandSymmetryCut(line, centroid(target.vertices))) {
+      const patch = patchAt(next, cut.point)
+      if (patch) next = splitPatch(next, patch.id, cut.line)
+    }
     if (next !== this.design) this.commit(next)
   }
 
@@ -107,20 +119,58 @@ class AppState {
     this.commit({ ...this.design, patches })
   }
 
-  private expandSymmetry(line: Line): Line[] {
+  // --- Coloring ---
+  setActiveColor(c: string) {
+    this.activeColor = c
+  }
+
+  addColor(c: string) {
+    if (!this.palette.includes(c)) this.palette.push(c)
+  }
+
+  removeColor(c: string) {
+    if (this.palette.length <= 1) return
+    this.palette = this.palette.filter((x) => x !== c)
+    if (this.activeColor === c) this.activeColor = this.palette[0]
+  }
+
+  /** Fill one patch with the active color (undoable). */
+  paintPatch(id: string) {
+    const patches = this.design.patches.map((p) =>
+      p.id === id ? { ...p, color: this.activeColor } : p,
+    )
+    this.commit({ ...this.design, patches })
+  }
+
+  /** Pick up a patch's color as the active color. */
+  eyedrop(id: string) {
+    const p = this.design.patches.find((x) => x.id === id)
+    if (p) this.activeColor = p.color
+  }
+
+  // For symmetry we mirror both the cut line AND a reference point inside the
+  // section, so each mirrored cut lands in the corresponding mirrored section.
+  private expandSymmetryCut(line: Line, point: Point): { line: Line; point: Point }[] {
     const cx = this.design.wIn / 2
     const cy = this.design.hIn / 2
+    const mx = (p: Point): Point => ({ x: 2 * cx - p.x, y: p.y })
+    const my = (p: Point): Point => ({ x: p.x, y: 2 * cy - p.y })
     switch (this.symmetry) {
       case 'v':
-        return [line, reflectX(line, cx)]
+        return [{ line, point }, { line: reflectX(line, cx), point: mx(point) }]
       case 'h':
-        return [line, reflectY(line, cy)]
+        return [{ line, point }, { line: reflectY(line, cy), point: my(point) }]
       case 'quad': {
         const lx = reflectX(line, cx)
-        return [line, lx, reflectY(line, cy), reflectY(lx, cy)]
+        return [
+          { line, point },
+          { line: lx, point: mx(point) },
+          { line: reflectY(line, cy), point: my(point) },
+          { line: reflectY(lx, cy), point: my(mx(point)) },
+        ]
       }
       default:
-        return [line]
+        return [{ line, point }]
     }
   }
 }

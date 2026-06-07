@@ -1,7 +1,7 @@
 <script lang="ts">
   import { app } from '../../app-state.svelte'
-  import { polygonPoints, nearestVertex } from '../model/design'
-  import { lineThroughPoints, clipLineToRect, snapAngle } from '../geometry/line'
+  import { polygonPoints, nearestVertex, patchAt } from '../model/design'
+  import { lineThroughPoints, clipLineToPolygon, snapAngle } from '../geometry/line'
   import type { Point } from '../geometry/types'
 
   // viewBox is in design INCHES, so geometry coordinates are used directly and
@@ -12,8 +12,9 @@
 
   let svgEl: SVGSVGElement | undefined
 
-  // Live drawing state (start/end of the current drag, plus snap markers).
+  // Live drawing state: the section being cut, the drag endpoints, snap markers.
   let drawing = $state(false)
+  let targetId = $state<string | null>(null)
   let startPt = $state<Point | null>(null)
   let endPt = $state<Point | null>(null)
   let snapStart = $state<Point | null>(null)
@@ -24,10 +25,13 @@
   const snapMaxIn = $derived(SNAP_PX / app.pxPerIn)
   const markerR = $derived(5 / app.pxPerIn)
 
-  // The cut being previewed, and its full edge-to-edge chord.
+  // The cut line and its segment, clipped to the section it is drawn in.
+  const targetPatch = $derived(
+    targetId ? design.patches.find((p) => p.id === targetId) : undefined,
+  )
   const previewLine = $derived(startPt && endPt ? lineThroughPoints(startPt, endPt) : null)
-  const previewChord = $derived(
-    previewLine ? clipLineToRect(previewLine, design.wIn, design.hIn) : null,
+  const previewSeg = $derived(
+    previewLine && targetPatch ? clipLineToPolygon(previewLine, targetPatch.vertices) : null,
   )
 
   /** Convert a pointer event to design (inch) coordinates via the SVG CTM. */
@@ -46,6 +50,10 @@
   function onPointerDown(e: PointerEvent) {
     if (app.mode !== 'draw' || e.button !== 0) return
     const raw = toInches(e)
+    // The section being cut is whichever patch the press lands in.
+    const hit = patchAt(design, raw)
+    if (!hit) return
+    targetId = hit.id
     let s = raw
     snapStart = null
     if (app.snapCorner) {
@@ -82,6 +90,7 @@
 
   function endDrag() {
     drawing = false
+    targetId = null
     startPt = null
     endPt = null
     snapStart = null
@@ -96,12 +105,23 @@
       // ignore
     }
     const line = previewLine
+    const id = targetId
     endDrag()
-    if (line) app.applyLine(line)
+    if (line && id) app.cutPatch(id, line)
   }
 
   function onKey(e: KeyboardEvent) {
     if (e.key === 'Escape' && drawing) endDrag()
+  }
+
+  // --- Color mode: click to fill, right-click to eyedrop ---
+  function onPatchClick(id: string) {
+    if (app.mode === 'color') app.paintPatch(id)
+  }
+  function onPatchContext(e: MouseEvent, id: string) {
+    if (app.mode !== 'color') return
+    e.preventDefault()
+    app.eyedrop(id)
   }
 </script>
 
@@ -139,7 +159,9 @@
     {/if}
 
     {#each design.patches as patch (patch.id)}
+      <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
       <polygon
+        class:clickable={app.mode === 'color'}
         points={polygonPoints(patch.vertices)}
         fill={patch.color}
         fill-opacity={design.blend}
@@ -147,6 +169,8 @@
         stroke-width="1"
         vector-effect="non-scaling-stroke"
         stroke-linejoin="round"
+        onclick={() => onPatchClick(patch.id)}
+        oncontextmenu={(e) => onPatchContext(e, patch.id)}
       />
     {/each}
 
@@ -162,15 +186,15 @@
       vector-effect="non-scaling-stroke"
     />
 
-    <!-- Live preview of the cut (full edge-to-edge chord) -->
-    {#if previewChord}
+    <!-- Live preview of the cut, contained within the section -->
+    {#if previewSeg}
       <line
-        x1={previewChord[0].x}
-        y1={previewChord[0].y}
-        x2={previewChord[1].x}
-        y2={previewChord[1].y}
+        x1={previewSeg[0].x}
+        y1={previewSeg[0].y}
+        x2={previewSeg[1].x}
+        y2={previewSeg[1].y}
         stroke="#7c3aed"
-        stroke-width="2"
+        stroke-width="2.5"
         stroke-dasharray="6 4"
         vector-effect="non-scaling-stroke"
         pointer-events="none"

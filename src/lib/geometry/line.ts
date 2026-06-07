@@ -57,6 +57,42 @@ export function clipLineToRect(line: Line, w: number, h: number): [Point, Point]
 }
 
 /**
+ * Intersect the infinite line with a convex polygon and return the chord
+ * (entry/exit points) that lies inside it, or null if it doesn't cross. Used to
+ * preview a cut that is contained within a single section.
+ */
+export function clipLineToPolygon(line: Line, poly: Point[]): [Point, Point] | null {
+  const hits: Point[] = []
+  const n = poly.length
+  for (let i = 0; i < n; i++) {
+    const a = poly[i]
+    const b = poly[(i + 1) % n]
+    const sa = side(line, a)
+    const sb = side(line, b)
+    if (Math.abs(sa) <= EPS) {
+      hits.push(a)
+    } else if ((sa < 0 && sb > 0) || (sa > 0 && sb < 0)) {
+      const t = sa / (sa - sb)
+      hits.push({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t })
+    }
+  }
+  if (hits.length < 2) return null
+  // Farthest-apart pair, robust against a vertex being counted twice.
+  let best: [Point, Point] | null = null
+  let bestD = -1
+  for (let i = 0; i < hits.length; i++) {
+    for (let j = i + 1; j < hits.length; j++) {
+      const d = (hits[i].x - hits[j].x) ** 2 + (hits[i].y - hits[j].y) ** 2
+      if (d > bestD) {
+        bestD = d
+        best = [hits[i], hits[j]]
+      }
+    }
+  }
+  return bestD > 1e-12 ? best : null
+}
+
+/**
  * Snap the drag direction p0->p1 to the nearest multiple of `stepDeg` when it
  * is within `thresholdDeg`, keeping p0 fixed and the length unchanged. Returns
  * the (possibly) adjusted end point.

@@ -1,10 +1,12 @@
 <script lang="ts">
   import { app } from '../../app-state.svelte'
   import { coverPlacement, loadImage, sampleAverageColors } from '../image/sampleColor'
+  import { nearestColor } from '../model/palette'
 
   const design = $derived(app.design)
   let busy = $state(false)
   let fileName = $state<string | null>(null)
+  let snapToPalette = $state(false)
 
   function readAsDataURL(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -43,6 +45,9 @@
     try {
       const img = await loadImage(design.photo.src)
       const colors = sampleAverageColors(img, design)
+      if (snapToPalette) {
+        for (const [id, c] of colors) colors.set(id, nearestColor(c, app.palette))
+      }
       app.applyPatchColors(colors)
       app.setBlend(1)
     } finally {
@@ -67,6 +72,10 @@
     <button class="btn primary full" onclick={autoColor} disabled={busy}>
       {busy ? 'Sampling…' : 'Auto-color from photo'}
     </button>
+
+    <label class="chk snap">
+      <input type="checkbox" bind:checked={snapToPalette} /> Snap to palette
+    </label>
 
     <label class="blend">
       <span>Photo</span>

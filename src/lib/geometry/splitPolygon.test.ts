@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import type { Point } from './types'
 import { lineThroughPoints } from './line'
-import { splitByLine } from './splitPolygon'
+import { splitByLine, pointInConvexPolygon } from './splitPolygon'
 import { area } from './vec'
 
 const UNIT_SQUARE: Point[] = [
@@ -82,5 +82,13 @@ describe('splitByLine', () => {
     const total = polys.reduce((s, p) => s + area(p), 0)
     expect(total).toBeCloseTo(1, 8)
     expect(polys.length).toBeGreaterThan(1)
+  })
+})
+
+describe('pointInConvexPolygon', () => {
+  it('detects inside vs outside a square', () => {
+    expect(pointInConvexPolygon({ x: 0.5, y: 0.5 }, UNIT_SQUARE)).toBe(true)
+    expect(pointInConvexPolygon({ x: 1.5, y: 0.5 }, UNIT_SQUARE)).toBe(false)
+    expect(pointInConvexPolygon({ x: -0.1, y: 0.5 }, UNIT_SQUARE)).toBe(false)
   })
 })

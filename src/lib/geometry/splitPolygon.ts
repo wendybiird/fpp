@@ -43,3 +43,19 @@ export function splitByLine(poly: Point[], line: Line): [Point[], Point[]] {
   const pos = clipHalfPlane(poly, line, 1)
   return [area(neg) > AREA_EPS ? neg : [], area(pos) > AREA_EPS ? pos : []]
 }
+
+/** Convex point-in-polygon: inside iff every edge cross-product shares a sign. */
+export function pointInConvexPolygon(p: Point, poly: Point[]): boolean {
+  let pos = false
+  let neg = false
+  const n = poly.length
+  for (let i = 0; i < n; i++) {
+    const a = poly[i]
+    const b = poly[(i + 1) % n]
+    const cross = (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x)
+    if (cross > 0) pos = true
+    else if (cross < 0) neg = true
+    if (pos && neg) return false
+  }
+  return true
+}

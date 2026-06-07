@@ -1,7 +1,7 @@
-// Design model: factory, the line-splitting engine (addLine), and small pure
-// read helpers used by the canvas.
+// Design model: factory, the per-section line-splitting engine (splitPatch),
+// and small pure read helpers used by the canvas.
 import type { Design, Line, Patch, Point } from '../geometry/types'
-import { splitByLine } from '../geometry/splitPolygon'
+import { splitByLine, pointInConvexPolygon } from '../geometry/splitPolygon'
 import { dist } from '../geometry/vec'
 
 let idCounter = 0
@@ -48,25 +48,31 @@ export function polygonPoints(poly: Point[]): string {
 }
 
 /**
- * Apply a full-chord cut: split every patch the line crosses into two, keeping
- * the parent's color (the new pieces are ungrouped/unnumbered). Patches the
- * line misses are left untouched. Returns the SAME design reference when
- * nothing was actually split, so callers can skip a no-op undo entry.
+ * Split a SINGLE patch (the section the user is drawing in) by a line. The line
+ * is contained within that patch — splitByLine clips it to the section's edges —
+ * so the cut bisects only that section, never running edge-to-edge across the
+ * whole block. Returns the SAME design reference when the line doesn't actually
+ * divide the patch, so callers can skip a no-op undo entry.
  */
-export function addLine(design: Design, line: Line): Design {
-  const patches: Patch[] = []
-  let changed = false
-  for (const patch of design.patches) {
-    const [neg, pos] = splitByLine(patch.vertices, line)
-    if (neg.length && pos.length) {
-      changed = true
-      patches.push({ id: nextId(), vertices: neg, color: patch.color })
-      patches.push({ id: nextId(), vertices: pos, color: patch.color })
-    } else {
-      patches.push(patch)
-    }
-  }
-  return changed ? { ...design, patches } : design
+export function splitPatch(design: Design, patchId: string, line: Line): Design {
+  const idx = design.patches.findIndex((p) => p.id === patchId)
+  if (idx < 0) return design
+  const patch = design.patches[idx]
+  const [neg, pos] = splitByLine(patch.vertices, line)
+  if (!neg.length || !pos.length) return design
+  const patches = design.patches.slice()
+  patches.splice(
+    idx,
+    1,
+    { id: nextId(), vertices: neg, color: patch.color },
+    { id: nextId(), vertices: pos, color: patch.color },
+  )
+  return { ...design, patches }
+}
+
+/** The first patch whose polygon contains p — i.e. the section being cut. */
+export function patchAt(design: Design, p: Point): Patch | undefined {
+  return design.patches.find((patch) => pointInConvexPolygon(p, patch.vertices))
 }
 
 /** Nearest existing patch vertex to p within maxDist (inches), or null. Used

@@ -3,6 +3,7 @@ import {
   lineThroughPoints,
   side,
   clipLineToRect,
+  clipLineToPolygon,
   snapAngle,
   reflectX,
   reflectY,
@@ -42,6 +43,28 @@ describe('clipLineToRect', () => {
   it('returns null when the line is outside the rectangle', () => {
     const line = lineThroughPoints({ x: 20, y: 0 }, { x: 20, y: 1 })!
     expect(clipLineToRect(line, 8, 8)).toBeNull()
+  })
+})
+
+describe('clipLineToPolygon', () => {
+  const SQUARE = [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 1, y: 1 },
+    { x: 0, y: 1 },
+  ]
+  it('returns the chord where a line crosses a convex polygon', () => {
+    const line = lineThroughPoints({ x: 0.5, y: -1 }, { x: 0.5, y: 2 })!
+    const seg = clipLineToPolygon(line, SQUARE)!
+    expect(seg).not.toBeNull()
+    const ys = seg.map((p) => p.y).sort((a, b) => a - b)
+    expect(ys[0]).toBeCloseTo(0, 9)
+    expect(ys[1]).toBeCloseTo(1, 9)
+    expect(seg.every((p) => Math.abs(p.x - 0.5) < 1e-9)).toBe(true)
+  })
+  it('returns null when the line misses the polygon', () => {
+    const line = lineThroughPoints({ x: 5, y: 0 }, { x: 5, y: 1 })!
+    expect(clipLineToPolygon(line, SQUARE)).toBeNull()
   })
 })
 

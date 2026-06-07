@@ -4,6 +4,7 @@
   import DesignCanvas from './lib/components/DesignCanvas.svelte'
   import SizeDialog from './lib/components/SizeDialog.svelte'
   import PhotoPanel from './lib/components/PhotoPanel.svelte'
+  import ColorPalette from './lib/components/ColorPalette.svelte'
 
   function onKeydown(e: KeyboardEvent) {
     const t = e.target as HTMLElement | null
@@ -53,6 +54,8 @@
     <aside class="side-panel">
       {#if app.mode === 'photo'}
         <PhotoPanel />
+      {:else if app.mode === 'color'}
+        <ColorPalette />
       {/if}
 
       <div class="panel-block">
