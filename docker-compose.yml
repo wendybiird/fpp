@@ -1,0 +1,22 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      # Live source from the host for instant edits/HMR...
+      - .:/app
+      # ...but keep node_modules in a named volume so Linux-native binaries
+      # (esbuild/rollup) never clash with the macOS host's files.
+      - node_modules:/app/node_modules
+    environment:
+      # Reliable file-watching on Docker Desktop / macOS bind mounts.
+      - CHOKIDAR_USEPOLLING=true
+    # Keep stdin/tty handy for interactive one-off commands.
+    stdin_open: true
+    tty: true
+
+volumes:
+  node_modules:
