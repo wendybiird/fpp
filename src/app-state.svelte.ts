@@ -4,6 +4,7 @@ import type { Design, Line, PhotoPlacement, Point } from './lib/geometry/types'
 import { createDesign, splitPatch, patchAt, centroid } from './lib/model/design'
 import { reflectX, reflectY } from './lib/geometry/line'
 import { DEFAULT_PALETTE } from './lib/model/palette'
+import { nextGroupLetter, toggleAssignment, clearGroup as clearGroupPatches } from './lib/model/grouping'
 
 export type Mode = 'draw' | 'photo' | 'color' | 'name'
 export type Symmetry = 'none' | 'v' | 'h' | 'quad'
@@ -36,6 +37,10 @@ class AppState {
   /** The fabric palette and the active (selected) color. */
   palette = $state<string[]>([...DEFAULT_PALETTE])
   activeColor = $state<string>(DEFAULT_PALETTE[2])
+
+  // --- Paper piecing ---
+  /** The active group letter being assigned in Naming mode. */
+  activeGroup = $state<string>('A')
 
   // --- History ---
   // We never mutate a Design in place (the engine returns a fresh design), so
@@ -146,6 +151,28 @@ class AppState {
   eyedrop(id: string) {
     const p = this.design.patches.find((x) => x.id === id)
     if (p) this.activeColor = p.color
+  }
+
+  // --- Paper-piecing naming ---
+  setActiveGroup(letter: string) {
+    this.activeGroup = letter
+  }
+
+  /** Start a fresh group (next unused letter) and make it active. */
+  addGroup() {
+    this.activeGroup = nextGroupLetter(this.design)
+  }
+
+  /** Toggle a patch's membership in the active group, in sewing order (undoable). */
+  toggleGroupAssignment(id: string) {
+    const patches = toggleAssignment(this.design.patches, id, this.activeGroup)
+    this.commit({ ...this.design, patches })
+  }
+
+  /** Remove every patch from a group (undoable). */
+  clearGroup(letter: string) {
+    const patches = clearGroupPatches(this.design.patches, letter)
+    this.commit({ ...this.design, patches })
   }
 
   // For symmetry we mirror both the cut line AND a reference point inside the

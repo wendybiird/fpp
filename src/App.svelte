@@ -5,6 +5,7 @@
   import SizeDialog from './lib/components/SizeDialog.svelte'
   import PhotoPanel from './lib/components/PhotoPanel.svelte'
   import ColorPalette from './lib/components/ColorPalette.svelte'
+  import GroupPanel from './lib/components/GroupPanel.svelte'
 
   function onKeydown(e: KeyboardEvent) {
     const t = e.target as HTMLElement | null
@@ -56,6 +57,8 @@
         <PhotoPanel />
       {:else if app.mode === 'color'}
         <ColorPalette />
+      {:else if app.mode === 'name'}
+        <GroupPanel />
       {/if}
 
       <div class="panel-block">
