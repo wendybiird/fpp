@@ -232,3 +232,59 @@ dl.meta dd {
   gap: 8px;
   margin-top: 6px;
 }
+
+/* ---- Toolbar drawing controls ---- */
+.toolbar .divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--border);
+  margin: 4px 2px;
+}
+.toolbar .group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.btn.icon {
+  padding: 5px 9px;
+  font-size: 15px;
+  line-height: 1;
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.btn:disabled:hover {
+  border-color: var(--border);
+}
+.snaps .chk {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.sym {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.sym select {
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* Crosshair while drawing cuts */
+svg.design.drawing-mode {
+  cursor: crosshair;
+}
