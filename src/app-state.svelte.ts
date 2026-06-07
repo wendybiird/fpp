@@ -18,6 +18,7 @@ import {
   downloadJson,
   type SavedDoc,
 } from './lib/model/persistence'
+import { completeSymmetry as completeSymmetryDesign } from './lib/model/symmetry'
 
 export type Mode = 'draw' | 'photo' | 'color' | 'name'
 export type Symmetry = 'none' | 'v' | 'h' | 'quad'
@@ -135,6 +136,15 @@ class AppState {
       const patch = patchAt(next, cut.point)
       if (patch) next = splitPatch(next, patch.id, cut.line)
     }
+    if (next !== this.design) this.commit(next)
+  }
+
+  /** Complete the design's symmetry by mirroring the existing cuts across the
+   *  active symmetry axes (one undo step). */
+  completeSymmetry() {
+    const kind = this.symmetry
+    if (kind === 'none') return
+    const next = completeSymmetryDesign(this.design, kind)
     if (next !== this.design) this.commit(next)
   }
 

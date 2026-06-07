@@ -74,6 +74,15 @@
         {/each}
       </select>
     </label>
+
+    <button
+      class="btn"
+      onclick={() => app.completeSymmetry()}
+      disabled={app.symmetry === 'none'}
+      title="Mirror the cuts you've drawn across the symmetry axes"
+    >
+      Complete
+    </button>
   {/if}
 
   <div class="spacer"></div>

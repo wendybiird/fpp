@@ -26,7 +26,8 @@ seam-allowance offset) simple and robust.
 - **Snapping** — snap line ends to existing corners, and snap the drag angle to
   15° increments (both toggleable).
 - **Symmetry** — auto-mirror each cut across the block's vertical / horizontal /
-  both axes (None / Mirror | / Mirror — / 4-way).
+  both axes (None / Mirror | / Mirror — / 4-way), or **Complete** a half-drawn
+  block's symmetry in one click.
 - **Undo / redo** — full history (Ctrl+Z / Ctrl+Shift+Z).
 - **Photo-to-quilt** — load a photo and auto-color each patch from the image; a
   Photo↔Flat slider blends the raw photo against the flat colors. (It also doubles
@@ -84,6 +85,6 @@ Built incrementally:
 - [x] True-size foundation templates with seam allowances (mirror + print to PDF, PNG export)
 - [x] Persistence (browser autosave + JSON save/load)
 
-The v1 plan is complete, plus an automatic FPP segmentation/sewing-order solver
-and tiled multi-page templates. Possible future work: automatic symmetry-completion
-of a partial drawing, and Electric Quilt export.
+The v1 plan is complete, plus an automatic FPP segmentation/sewing-order solver,
+tiled multi-page templates, and automatic symmetry-completion of a partial
+drawing. Possible future work: Electric Quilt (`.EQ`) export.
