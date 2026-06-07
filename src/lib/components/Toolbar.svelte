@@ -15,12 +15,30 @@
     { id: 'h', label: 'Mirror —' },
     { id: 'quad', label: '4-way' },
   ]
+
+  async function onLoadFile(e: Event) {
+    const input = e.currentTarget as HTMLInputElement
+    const file = input.files?.[0]
+    if (!file) return
+    const text = await file.text()
+    if (!app.loadFromText(text)) {
+      alert("That file doesn't look like an FPP design.")
+    }
+    input.value = ''
+  }
 </script>
 
 <header class="toolbar">
   <strong class="brand">FPP<span>foundation paper piecing</span></strong>
 
-  <button class="btn" onclick={() => (app.showSizeDialog = true)}>New…</button>
+  <div class="group" role="group" aria-label="File">
+    <button class="btn" onclick={() => (app.showSizeDialog = true)}>New…</button>
+    <button class="btn" onclick={() => app.saveFile()}>Save</button>
+    <label class="btn file-load" title="Load a saved .json design">
+      Load
+      <input type="file" accept="application/json,.json" hidden onchange={onLoadFile} />
+    </label>
+  </div>
 
   <div class="modes" role="group" aria-label="Mode">
     {#each modes as m (m.id)}

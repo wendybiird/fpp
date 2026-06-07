@@ -10,6 +10,15 @@ export function nextId(): string {
   return `p${++idCounter}`
 }
 
+/** Advance the id counter past any restored patch ids so later cuts don't
+ *  collide with loaded ones. */
+export function syncIdCounter(patches: { id: string }[]): void {
+  for (const p of patches) {
+    const m = /^p(\d+)$/.exec(p.id)
+    if (m) idCounter = Math.max(idCounter, Number(m[1]))
+  }
+}
+
 /** Default fill for fresh, uncolored patches (a neutral muslin tone). */
 export const DEFAULT_PATCH_COLOR = '#e9e6df'
 

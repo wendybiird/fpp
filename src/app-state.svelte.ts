@@ -1,10 +1,18 @@
 // Central application state, using Svelte 5 runes in a `.svelte.ts` module.
 // A single exported instance (`app`) is imported wherever state is needed.
 import type { Design, Line, PhotoPlacement, Point } from './lib/geometry/types'
-import { createDesign, splitPatch, patchAt, centroid } from './lib/model/design'
+import { createDesign, splitPatch, patchAt, centroid, syncIdCounter } from './lib/model/design'
 import { reflectX, reflectY } from './lib/geometry/line'
 import { DEFAULT_PALETTE } from './lib/model/palette'
 import { nextGroupLetter, toggleAssignment, clearGroup as clearGroupPatches } from './lib/model/grouping'
+import {
+  serialize,
+  parseDoc,
+  saveToLocal,
+  loadFromLocal,
+  downloadJson,
+  type SavedDoc,
+} from './lib/model/persistence'
 
 export type Mode = 'draw' | 'photo' | 'color' | 'name'
 export type Symmetry = 'none' | 'v' | 'h' | 'quad'
@@ -50,6 +58,25 @@ class AppState {
   // keeping previous references is a complete and cheap undo history — no cloning.
   undoStack = $state<Design[]>([])
   redoStack = $state<Design[]>([])
+
+  /** Non-reactive debounce handle for autosave. */
+  private saveTimer: ReturnType<typeof setTimeout> | undefined
+
+  constructor() {
+    // Restore the autosaved design, if any.
+    const saved = loadFromLocal()
+    if (saved) this.applyDoc(saved)
+
+    // Debounced autosave. Re-serializing reads the whole design + palette, so
+    // this effect re-runs on any change to either.
+    $effect.root(() => {
+      $effect(() => {
+        const json = serialize(this.design, this.palette)
+        clearTimeout(this.saveTimer)
+        this.saveTimer = setTimeout(() => saveToLocal(json), 400)
+      })
+    })
+  }
 
   get canUndo(): boolean {
     return this.undoStack.length > 0
@@ -176,6 +203,28 @@ class AppState {
   clearGroup(letter: string) {
     const patches = clearGroupPatches(this.design.patches, letter)
     this.commit({ ...this.design, patches })
+  }
+
+  // --- Persistence ---
+  /** Download the current design (+ palette) as a JSON file. */
+  saveFile() {
+    downloadJson(serialize(this.design, this.palette))
+  }
+
+  /** Load a design from JSON text. Returns false if it isn't a valid file. */
+  loadFromText(text: string): boolean {
+    const doc = parseDoc(text)
+    if (!doc) return false
+    this.applyDoc(doc)
+    return true
+  }
+
+  private applyDoc(doc: SavedDoc) {
+    this.design = doc.design
+    if (doc.palette.length) this.palette = doc.palette
+    syncIdCounter(doc.design.patches)
+    this.undoStack = []
+    this.redoStack = []
   }
 
   // For symmetry we mirror both the cut line AND a reference point inside the

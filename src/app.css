@@ -54,6 +54,7 @@ h3 {
   font-size: 18px;
   letter-spacing: 0.5px;
   color: var(--accent);
+  flex-shrink: 0;
 }
 .brand span {
   font-size: 9px;
@@ -61,6 +62,7 @@ h3 {
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--text-dim);
+  white-space: nowrap;
 }
 
 .toolbar .spacer {
@@ -491,4 +493,10 @@ svg.design polygon.clickable:hover {
 }
 .muted.small {
   font-size: 11px;
+}
+
+.file-load {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
 }

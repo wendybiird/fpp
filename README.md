@@ -37,6 +37,8 @@ seam-allowance offset) simple and robust.
   single-seam check flags any piece that can't be added with one straight seam.
 - **Templates** — true-size foundation templates per group with a seam allowance,
   numbered and mirror-ready, printable to PDF; plus PNG export of the design.
+- **Save & load** — designs autosave in your browser and restore on reload; Save
+  downloads a `.json` (photo, colors, and groups included) and Load reopens it.
 
 Keyboard: `E` draw · `C` color · `P` photo · `N` name · `Ctrl/Cmd+Z` / `+Shift+Z`.
 
@@ -78,4 +80,8 @@ Built incrementally:
 - [x] Coloring palette (fill, eyedropper, snap-to-palette)
 - [x] Paper-piecing naming (group letters + sewing order, single-seam check)
 - [x] True-size foundation templates with seam allowances (mirror + print to PDF, PNG export)
-- [ ] Persistence (autosave + JSON save/load)
+- [x] Persistence (browser autosave + JSON save/load)
+
+The v1 plan is complete. Possible future work: automatic symmetry-completion of a
+partial drawing, an automatic FPP segmentation/sewing-order solver, Electric Quilt
+export, and tiled multi-page templates.
