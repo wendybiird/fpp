@@ -25,6 +25,9 @@ class AppState {
   /** Whether the "New design" dialog is open. */
   showSizeDialog = $state(false)
 
+  /** Whether the print / templates view is open. */
+  showPrint = $state(false)
+
   // --- Drawing aids ---
   /** Snap line endpoints to existing patch corners. */
   snapCorner = $state(true)

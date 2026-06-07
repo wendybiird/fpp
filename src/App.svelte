@@ -6,6 +6,7 @@
   import PhotoPanel from './lib/components/PhotoPanel.svelte'
   import ColorPalette from './lib/components/ColorPalette.svelte'
   import GroupPanel from './lib/components/GroupPanel.svelte'
+  import PrintView from './lib/components/PrintView.svelte'
 
   function onKeydown(e: KeyboardEvent) {
     const t = e.target as HTMLElement | null
@@ -79,5 +80,9 @@
 
   {#if app.showSizeDialog}
     <SizeDialog />
+  {/if}
+
+  {#if app.showPrint}
+    <PrintView />
   {/if}
 </div>

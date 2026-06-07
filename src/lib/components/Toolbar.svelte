@@ -1,5 +1,6 @@
 <script lang="ts">
   import { app, type Mode, type Symmetry } from '../../app-state.svelte'
+  import { exportDesignPng } from '../image/exportPng'
 
   const modes: { id: Mode; label: string; key: string }[] = [
     { id: 'draw', label: 'Draw', key: 'E' },
@@ -58,6 +59,11 @@
   {/if}
 
   <div class="spacer"></div>
+
+  <div class="group" role="group" aria-label="Export">
+    <button class="btn" onclick={() => (app.showPrint = true)}>Print…</button>
+    <button class="btn" onclick={() => exportDesignPng()}>PNG</button>
+  </div>
 
   <label class="zoom">
     Zoom

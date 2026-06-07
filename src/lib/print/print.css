@@ -1,0 +1,92 @@
+/* Print view: a full-screen overlay on screen; on print, only the template
+   sheets are shown, sized in real inches via the SVG width/height. */
+
+.print-root {
+  position: fixed;
+  inset: 0;
+  background: #e9ebef;
+  z-index: 50;
+  overflow: auto;
+}
+
+.print-bar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.print-bar .spacer {
+  flex: 1;
+}
+.print-bar .pchk {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.print-empty {
+  padding: 48px;
+  text-align: center;
+  color: var(--text-dim);
+}
+
+.sheets {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+}
+
+.sheet {
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 0.5in;
+}
+.sheet-title {
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 8px;
+  font-family: system-ui, sans-serif;
+}
+svg.tpl {
+  display: block;
+}
+
+@media print {
+  /* Show only the print overlay. */
+  body * {
+    visibility: hidden;
+  }
+  .print-root,
+  .print-root * {
+    visibility: visible;
+  }
+  .print-root {
+    position: static;
+    background: #fff;
+    overflow: visible;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .sheets {
+    display: block;
+    padding: 0;
+    gap: 0;
+  }
+  .sheet {
+    box-shadow: none;
+    padding: 0;
+    page-break-after: always;
+  }
+  @page {
+    size: auto;
+    margin: 0.5in;
+  }
+}

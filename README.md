@@ -33,6 +33,10 @@ seam-allowance offset) simple and robust.
   as a visual check that the patches tile cleanly.)
 - **Coloring** — a fabric palette with eyedropper (right-click) and click-to-fill;
   optionally snap photo-sampled colors to the nearest palette fabric.
+- **Paper piecing** — assign patches to foundation groups in sewing order; a
+  single-seam check flags any piece that can't be added with one straight seam.
+- **Templates** — true-size foundation templates per group with a seam allowance,
+  numbered and mirror-ready, printable to PDF; plus PNG export of the design.
 
 Keyboard: `E` draw · `C` color · `P` photo · `N` name · `Ctrl/Cmd+Z` / `+Shift+Z`.
 
@@ -73,5 +77,5 @@ Built incrementally:
 - [x] Photo-to-quilt (auto-color + blend)
 - [x] Coloring palette (fill, eyedropper, snap-to-palette)
 - [x] Paper-piecing naming (group letters + sewing order, single-seam check)
-- [ ] True-size templates with seam allowances (print to PDF)
+- [x] True-size foundation templates with seam allowances (mirror + print to PDF, PNG export)
 - [ ] Persistence (autosave + JSON save/load)
