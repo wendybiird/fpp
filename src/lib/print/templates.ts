@@ -85,3 +85,61 @@ export function buildTemplates(design: Design, mirror: boolean): Template[] {
 export function ptsAttr(poly: Point[]): string {
   return poly.map((p) => `${p.x},${p.y}`).join(' ')
 }
+
+export interface PageTile {
+  template: Template
+  row: number
+  col: number
+  rows: number
+  cols: number
+  /** Sub-region of the template shown on this page (inches). */
+  minX: number
+  minY: number
+  w: number
+  h: number
+}
+
+/** Printable content area (inches) per page size, after ~0.5in margins. */
+export const PAGE_SIZES: Record<string, { w: number; h: number }> = {
+  Letter: { w: 7.5, h: 10 },
+  A4: { w: 7.27, h: 10.69 },
+}
+
+/**
+ * Split a template across a grid of pages when it is larger than the printable
+ * area. Adjacent tiles overlap by `overlap` inches so they can be trimmed and
+ * taped. A template that already fits returns a single full-size tile.
+ */
+export function tileTemplate(
+  t: Template,
+  pageW: number,
+  pageH: number,
+  overlap: number,
+): PageTile[] {
+  if (t.w <= pageW && t.h <= pageH) {
+    return [
+      { template: t, row: 0, col: 0, rows: 1, cols: 1, minX: t.minX, minY: t.minY, w: t.w, h: t.h },
+    ]
+  }
+  const stepX = Math.max(0.1, pageW - overlap)
+  const stepY = Math.max(0.1, pageH - overlap)
+  const cols = Math.max(1, Math.ceil((t.w - overlap) / stepX))
+  const rows = Math.max(1, Math.ceil((t.h - overlap) / stepY))
+  const tiles: PageTile[] = []
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      tiles.push({
+        template: t,
+        row: r,
+        col: c,
+        rows,
+        cols,
+        minX: t.minX + c * stepX,
+        minY: t.minY + r * stepY,
+        w: pageW,
+        h: pageH,
+      })
+    }
+  }
+  return tiles
+}

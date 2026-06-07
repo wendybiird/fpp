@@ -28,6 +28,15 @@
   gap: 6px;
   font-size: 13px;
 }
+.print-bar select {
+  font: inherit;
+  font-size: 13px;
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+}
 
 .print-empty {
   padding: 48px;

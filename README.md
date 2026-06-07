@@ -33,10 +33,12 @@ seam-allowance offset) simple and robust.
   as a visual check that the patches tile cleanly.)
 - **Coloring** — a fabric palette with eyedropper (right-click) and click-to-fill;
   optionally snap photo-sampled colors to the nearest palette fabric.
-- **Paper piecing** — assign patches to foundation groups in sewing order; a
-  single-seam check flags any piece that can't be added with one straight seam.
+- **Paper piecing** — assign patches to foundation groups in sewing order, or
+  **Auto-number** the whole block automatically; a single-seam check flags any
+  piece that can't be added with one straight seam.
 - **Templates** — true-size foundation templates per group with a seam allowance,
-  numbered and mirror-ready, printable to PDF; plus PNG export of the design.
+  numbered and mirror-ready; **tiled across pages** with overlap + registration
+  marks when larger than the sheet, printable to PDF; plus PNG export.
 - **Save & load** — designs autosave in your browser and restore on reload; Save
   downloads a `.json` (photo, colors, and groups included) and Load reopens it.
 
@@ -82,6 +84,6 @@ Built incrementally:
 - [x] True-size foundation templates with seam allowances (mirror + print to PDF, PNG export)
 - [x] Persistence (browser autosave + JSON save/load)
 
-The v1 plan is complete. Possible future work: automatic symmetry-completion of a
-partial drawing, an automatic FPP segmentation/sewing-order solver, Electric Quilt
-export, and tiled multi-page templates.
+The v1 plan is complete, plus an automatic FPP segmentation/sewing-order solver
+and tiled multi-page templates. Possible future work: automatic symmetry-completion
+of a partial drawing, and Electric Quilt export.
